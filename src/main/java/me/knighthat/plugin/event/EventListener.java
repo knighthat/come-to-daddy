@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
@@ -141,5 +142,38 @@ public class EventListener implements Listener {
                         new MagnetDeactivateEvent( player, item );
                 Bukkit.getServer().getPluginManager().callEvent( itemEvent );
             }
+    }
+
+    /*
+     * A bug was introduced after extensive testing.
+     *
+     * Description: When a player dies with 'MagnetItem' activated,
+     * all of his/her inventory will be restored at the time of respawn.
+     * This happens due to the ongoing task, and the player is still present
+     * in 'USING_MAGNET' set.
+     *
+     * Solution: Remove player from the set at the time of death by calling
+     * MagnetDeactivateEvent
+     */
+    @EventHandler
+    public void onPlayerDeath( @NotNull PlayerDeathEvent event ) {
+        if ( event.getKeepInventory() )
+            return;
+
+        for (ItemStack item : event.getDrops()) {
+            if ( !MagnetItem.isPluginItem( item ) )
+                continue;
+
+            boolean isEnabled = DataHandler.extract( item );
+            if ( !isEnabled )
+                break;
+
+            DataHandler.inject( item, false );
+            Bukkit.getServer()
+                  .getPluginManager()
+                  .callEvent( new MagnetDeactivateEvent( event.getPlayer(), item ) );
+
+            break;
+        }
     }
 }

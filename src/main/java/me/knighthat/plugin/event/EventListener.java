@@ -3,6 +3,7 @@ package me.knighthat.plugin.event;
 import me.knighthat.plugin.ComeToDaddy;
 import me.knighthat.plugin.data.DataHandler;
 import me.knighthat.plugin.item.MagnetItem;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -34,38 +35,43 @@ public class EventListener implements Listener {
     @NotNull
     private final ComeToDaddy plugin;
 
-    public EventListener( @NotNull ComeToDaddy plugin ) {
+    public EventListener(@NotNull ComeToDaddy plugin) {
         this.plugin = plugin;
     }
 
     /*
      * Triggers when player holds and right-clicks {@link me.knighthat.plugin.item.}
      */
-    @EventHandler( priority = EventPriority.HIGHEST )
-    public void onShiftRightClick( @NotNull PlayerInteractEvent event ) {
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onShiftRightClick(@NotNull PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
         // Proceed only when player right-clicks and is crouching
-        if ( !event.getAction().isRightClick() || !player.isSneaking() )
+        if (!event.getAction().isRightClick() || !player.isSneaking())
             return;
         // Check if item is plugin's Magnet
         ItemStack inHand = event.getItem();
-        if ( !MagnetItem.isPluginItem( inHand ) )
+        if (!MagnetItem.isPluginItem(inHand))
             return;
-        event.setCancelled( true );
+        event.setCancelled(true);
 
-        boolean isEnabled = !DataHandler.extract( inHand );
+        boolean isEnabled = !DataHandler.extract(inHand);
 
         MagnetItemEvent itemEvent = isEnabled ?
-                new MagnetActivateEvent( player, inHand ) :
-                new MagnetDeactivateEvent( player, inHand );
-        Bukkit.getServer().getPluginManager().callEvent( itemEvent );
+                new MagnetActivateEvent(player, inHand) :
+                new MagnetDeactivateEvent(player, inHand);
+        Bukkit.getServer().getPluginManager().callEvent(itemEvent);
 
-        if ( itemEvent.isCancelled() )
+        if (itemEvent.isCancelled())
             return;
 
-        DataHandler.inject( inHand, isEnabled );
+        DataHandler.inject(inHand, isEnabled);
         event.getPlayer().updateInventory();
+
+        // Send deactivate message
+        String msgPath = isEnabled ? "activate" : "deactivate";
+        Component message = plugin.getMessages().message(msgPath);
+        event.getPlayer().sendMessage(message);
     }
 
     /*
@@ -74,10 +80,10 @@ public class EventListener implements Listener {
      * then put that player to 'USING_MAGNET' set.
      */
     @EventHandler
-    public void onPlayerActivateMagnet( @NotNull MagnetActivateEvent event ) {
+    public void onPlayerActivateMagnet(@NotNull MagnetActivateEvent event) {
         Player player = event.getPlayer();
 
-        USING_MAGNET.add( player );
+        USING_MAGNET.add(player);
         Bukkit.getScheduler().runTaskTimer(
                 plugin,
                 task -> {
@@ -85,7 +91,7 @@ public class EventListener implements Listener {
                      * If the player is no longer only or present in the 'USING_MAGNET' set,
                      * then the task should cancel itself.
                      */
-                    if ( !USING_MAGNET.contains( player ) || !player.isOnline() ) {
+                    if (!USING_MAGNET.contains(player) || !player.isOnline()) {
                         task.cancel();
                         return;
                     }
@@ -96,12 +102,12 @@ public class EventListener implements Listener {
                      * each of them into the player's inventory. Inventory#addItem()
                      * will return any item that can't be fit into the inventory.
                      */
-                    for (Entity entity : player.getNearbyEntities( 5d, 5d, 5d )) {
-                        if ( !(entity instanceof Item item) )
+                    for (Entity entity : player.getNearbyEntities(5d, 5d, 5d)) {
+                        if (!(entity instanceof Item item))
                             continue;
 
                         ItemStack itemStack = item.getItemStack();
-                        leftOvers.addAll( player.getInventory().addItem( itemStack ).values() );
+                        leftOvers.addAll(player.getInventory().addItem(itemStack).values());
 
                         item.remove();
                     }
@@ -111,36 +117,36 @@ public class EventListener implements Listener {
                      * at that player's feet.
                      */
                     for (ItemStack item : leftOvers)
-                        player.getWorld().dropItem( player.getLocation(), item );
+                        player.getWorld().dropItem(player.getLocation(), item);
                 },
                 0L,
                 5L
         );
 
-        event.getItem().editMeta( meta -> meta.addEnchant( Enchantment.DURABILITY, 1, true ) );
+        event.getItem().editMeta(meta -> meta.addEnchant(Enchantment.DURABILITY, 1, true));
     }
 
     @EventHandler
-    public void onPlayerDeactivateMagnet( @NotNull MagnetDeactivateEvent event ) {
+    public void onPlayerDeactivateMagnet(@NotNull MagnetDeactivateEvent event) {
         /*
          * Since the task already checks if the player still present in the
          * 'USING_MAGNET' set. Removing player from the set will result in the task getting canceled
          */
-        USING_MAGNET.remove( event.getPlayer() );
-        event.getItem().editMeta( ItemMeta::removeEnchantments );
+        USING_MAGNET.remove(event.getPlayer());
+        event.getItem().editMeta(ItemMeta::removeEnchantments);
     }
 
     @EventHandler
-    public void onPlayerLogin( @NotNull PlayerJoinEvent event ) {
+    public void onPlayerLogin(@NotNull PlayerJoinEvent event) {
         Player player = event.getPlayer();
         for (ItemStack item : player.getInventory().getContents())
-            if ( MagnetItem.isPluginItem( item ) ) {
+            if (MagnetItem.isPluginItem(item)) {
 
-                boolean isEnabled = DataHandler.extract( item );
+                boolean isEnabled = DataHandler.extract(item);
                 MagnetItemEvent itemEvent = isEnabled ?
-                        new MagnetActivateEvent( player, item ) :
-                        new MagnetDeactivateEvent( player, item );
-                Bukkit.getServer().getPluginManager().callEvent( itemEvent );
+                        new MagnetActivateEvent(player, item) :
+                        new MagnetDeactivateEvent(player, item);
+                Bukkit.getServer().getPluginManager().callEvent(itemEvent);
             }
     }
 
@@ -156,22 +162,22 @@ public class EventListener implements Listener {
      * MagnetDeactivateEvent
      */
     @EventHandler
-    public void onPlayerDeath( @NotNull PlayerDeathEvent event ) {
-        if ( event.getKeepInventory() )
+    public void onPlayerDeath(@NotNull PlayerDeathEvent event) {
+        if (event.getKeepInventory())
             return;
 
         for (ItemStack item : event.getDrops()) {
-            if ( !MagnetItem.isPluginItem( item ) )
+            if (!MagnetItem.isPluginItem(item))
                 continue;
 
-            boolean isEnabled = DataHandler.extract( item );
-            if ( !isEnabled )
+            boolean isEnabled = DataHandler.extract(item);
+            if (!isEnabled)
                 break;
 
-            DataHandler.inject( item, false );
+            DataHandler.inject(item, false);
             Bukkit.getServer()
-                  .getPluginManager()
-                  .callEvent( new MagnetDeactivateEvent( event.getPlayer(), item ) );
+                    .getPluginManager()
+                    .callEvent(new MagnetDeactivateEvent(event.getPlayer(), item));
 
             break;
         }

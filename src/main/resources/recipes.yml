@@ -1,0 +1,96 @@
+#  basic:
+#    recipe:
+#      type: CRAFTING
+#      shape:
+#        - "LII"
+#        - "  I"
+#        - "RII"
+#      ingredients:
+#        L: LAPIS_LAZULI
+#        I: IRON_INGOT
+#        R: REDSTONE
+#    result:
+#      material: IRON_INGOT
+#      name: "&d&lMagnet"
+#      lore:
+#        - "&7[&8Shift + Right-click&7] To toggle!"
+#        - "&bTier: %tier%"
+#    properties:
+#      tier_name: "&rbasic"
+#      x: 5.0
+#      y: 5.0
+#      z: 5.0
+
+# This is the first tier of the magnet
+# You can name "basic" anything you want.
+# Plugin uses this name for error if any occurs.
+#
+# Make sure names are distinct from each other.
+basic:
+  recipe:
+    # Only supports CRAFTING at the moment. DO NOT CHANGE
+    type: CRAFTING
+    # Shape consists of 3 lines (3 letters each line).
+    # You can imagine this is the crafting table.
+    # Space character ' ' can be used as empty slot.
+    # NOTE: A void using Unicode characters as they
+    # usually use more than 1 byte to represent a character.
+    # This may break the interpreter.
+    shape:
+    - "LII"
+    - "  I"
+    - "RII"
+    # Now you will define what each letter stands for
+    # You can't define space character ' ' as they are interpreted
+    # as empty slot by default.
+    #
+    # L: LAPIS_LAZULI
+    # Key 'L' is the letter you used in the shape
+    # 'LAPIS_LAZULI' is the material.
+    # Visit https://jd.papermc.io/paper/1.20/org/bukkit/material/package-summary.html for list of materials.
+    ingredients:
+      L: LAPIS_LAZULI
+      I: IRON_INGOT
+      R: REDSTONE
+  result:
+    material: IRON_INGOT
+    name: "&d&lMagnet"
+    lore:
+    - "&7[&8Shift + Right-click&7] To toggle!"
+    - "&bTier: %tier%"
+  properties:
+    # Its value will be used to replace '%tier%' in result.name and result.lore
+    tier_name: "&rbasic"
+    # x, y, z define the area which this magnet will check and collect items.
+    #
+    # ATTENTION: They are bidirectional, meaning, both positive and negative direction will
+    # be added 5 or minus 5. For example, player's x is 0.0 and 'x' is set at '5.0'.
+    # Plugin will attempt to collect items from -5.0 to 5.0 on 'x' axle.
+    x: 5.0
+    y: 5.0
+    z: 5.0
+
+advanced:
+  recipe:
+    type: CRAFTING
+    shape:
+    - "LID"
+    - " EI"
+    - "RID"
+    ingredients:
+      L: LAPIS_LAZULI
+      I: IRON_INGOT
+      R: REDSTONE
+      E: ENDER_PEARL
+      D: DIAMOND
+  result:
+    material: GOLD_INGOT
+    name: "&6&lSuper &d&lMagnet"
+    lore:
+    - "&7[&8Shift + Right-click&7] To toggle!"
+    - "&bTier: %tier%"
+  properties:
+    tier_name: "&6&lADVANCED"
+    x: 10.0
+    y: 5.0
+    z: 10.0

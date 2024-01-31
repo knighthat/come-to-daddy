@@ -4,10 +4,8 @@ import lombok.Getter;
 import me.knighthat.plugin.data.DataHandler;
 import me.knighthat.plugin.event.EventListener;
 import me.knighthat.plugin.file.MessageFile;
-import me.knighthat.plugin.item.MagnetItem;
-import org.bukkit.Material;
+import me.knighthat.plugin.file.RecipeFile;
 import org.bukkit.NamespacedKey;
-import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,12 +14,15 @@ public class ComeToDaddy extends JavaPlugin {
 
     @NotNull
     private final MessageFile messages;
+    @NotNull
+    private final RecipeFile  recipes;
 
     public ComeToDaddy() {
         DataHandler.KEY = new NamespacedKey( this, "ComeToDaddy" );
         DataHandler.PROPERTY_KEY = new NamespacedKey( this, "magnet" );
 
-        this.messages = new MessageFile(this);
+        this.messages = new MessageFile( this );
+        this.recipes = new RecipeFile( this );
     }
 
     @Override
@@ -31,17 +32,5 @@ public class ComeToDaddy extends JavaPlugin {
 
         // Register command
         //getCommand( "ctd" ).setExecutor( new CommandManager( this ) );
-
-        ShapedRecipe recipe = new ShapedRecipe(DataHandler.KEY, new MagnetItem());
-        recipe.shape(
-                "LII",
-                "  I",
-                "RII"
-        );
-        recipe.setIngredient('L', Material.LAPIS_LAZULI);
-        recipe.setIngredient('I', Material.IRON_INGOT);
-        recipe.setIngredient('R', Material.REDSTONE);
-
-        getServer().addRecipe(recipe);
     }
 }

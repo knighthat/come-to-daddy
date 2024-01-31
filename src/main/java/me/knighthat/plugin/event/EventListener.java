@@ -3,7 +3,9 @@ package me.knighthat.plugin.event;
 import me.knighthat.plugin.ComeToDaddy;
 import me.knighthat.plugin.data.DataHandler;
 import me.knighthat.plugin.item.MagnetItem;
+import me.knighthat.plugin.item.MagnetProperties;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -37,6 +39,56 @@ public class EventListener implements Listener {
 
     public EventListener( @NotNull ComeToDaddy plugin ) {
         this.plugin = plugin;
+    }
+
+    private @NotNull Component color( @NotNull String s ) {
+        return LegacyComponentSerializer.legacyAmpersand().deserialize( s );
+    }
+
+    private void collect( @NotNull Player player, double x, double y, double z ) {
+        List<ItemStack> leftOvers = new ArrayList<>();
+        /*
+         * Here we check for nearby items, then attempt to put
+         * each of them into the player's inventory. Inventory#addItem()
+         * will return any item that can't be fit into the inventory.
+         */
+        for (Entity entity : player.getNearbyEntities( x, y, z )) {
+            if ( !(entity instanceof Item item) )
+                continue;
+
+            ItemStack itemStack = item.getItemStack();
+            leftOvers.addAll( player.getInventory().addItem( itemStack ).values() );
+
+            item.remove();
+        }
+
+        /*
+         * Items can't be put inside player's inventory will be 'gathered'
+         * at that player's feet.
+         */
+        for (ItemStack item : leftOvers)
+            player.getWorld().dropItem( player.getLocation(), item );
+    }
+
+    private void scheduleTask( @NotNull Player player, @NotNull MagnetProperties.Area area ) {
+        USING_MAGNET.add( player );
+        Bukkit.getScheduler().runTaskTimer(
+                plugin,
+                task -> {
+                    /*
+                     * If the player is no longer only or present in the 'USING_MAGNET' set,
+                     * then the task should cancel itself.
+                     */
+                    if ( !USING_MAGNET.contains( player ) || !player.isOnline() ) {
+                        task.cancel();
+                        return;
+                    }
+
+                    collect( player, area.getX(), area.getY(), area.getZ() );
+                },
+                0L,
+                5L
+        );
     }
 
     /*
@@ -83,50 +135,64 @@ public class EventListener implements Listener {
      * will create a repeated task that attracts items around him/her,
      * then put that player to 'USING_MAGNET' set.
      */
+
+    @EventHandler( priority = EventPriority.HIGHEST )
+    public void onPlayerShiftRightClick( @NotNull PlayerInteractEvent event ) {
+        Player player = event.getPlayer();
+        ItemStack inHand = event.getItem();
+
+        // Only proceed if a player shifts + right-clicks while holding MagnetItem
+        if ( !event.getAction().isRightClick() ||
+             !player.isSneaking() ||
+             !MagnetItem.hasProperties( inHand ) ) {
+            return;
+        } else
+            event.setCancelled( true );
+
+        MagnetProperties properties = DataHandler.pull( inHand );
+        boolean isEnabled = !properties.isActivated();
+
+        MagnetItemEvent itemEvent = isEnabled ?
+                new MagnetActivateEvent( player, inHand ) :
+                new MagnetDeactivateEvent( player, inHand );
+        Bukkit.getServer().getPluginManager().callEvent( itemEvent );
+        if ( itemEvent.isCancelled() )
+            return;
+
+        properties.setActivated( isEnabled );
+        DataHandler.push( inHand, properties );
+        event.getPlayer().updateInventory();
+
+        // Send (de)activate message
+        String msgPath = isEnabled ? "activate" : "deactivate";
+        Component message = plugin.getMessages().message( msgPath );
+        event.getPlayer().sendMessage( message );
+    }
+
     @EventHandler
     public void onPlayerActivateMagnet( @NotNull MagnetActivateEvent event ) {
-        Player player = event.getPlayer();
+        MagnetProperties.Area area;
+        if ( MagnetItem.isPluginItem( event.getItem() ) )
+            /*
+             * This block handles old magnet item
+             * However, this is marked deprecated and will
+             * no longer getting update.
+             * In the future, deprecated item will be assigned
+             * new PersistentData of MagnetProperty.DEFAULT which
+             * does not attract items.
+             */
+            area = new MagnetProperties.Area( 5d, 5d, 5d );
+        else if ( MagnetItem.hasProperties( event.getItem() ) )
+            area = DataHandler.pull( event.getItem() ).getArea();
+        else
+            /*
+             * This block just a precaution step to ensure 'area'
+             * isn't null.
+             * The DEFAULT area is 0.
+             */
+            area = MagnetProperties.DEFAULT.getArea();
 
-        USING_MAGNET.add( player );
-        Bukkit.getScheduler().runTaskTimer(
-                plugin,
-                task -> {
-                    /*
-                     * If the player is no longer only or present in the 'USING_MAGNET' set,
-                     * then the task should cancel itself.
-                     */
-                    if ( !USING_MAGNET.contains( player ) || !player.isOnline() ) {
-                        task.cancel();
-                        return;
-                    }
-
-                    List<ItemStack> leftOvers = new ArrayList<>();
-                    /*
-                     * Here we check for nearby items, then attempt to put
-                     * each of them into the player's inventory. Inventory#addItem()
-                     * will return any item that can't be fit into the inventory.
-                     */
-                    for (Entity entity : player.getNearbyEntities( 5d, 5d, 5d )) {
-                        if ( !(entity instanceof Item item) )
-                            continue;
-
-                        ItemStack itemStack = item.getItemStack();
-                        leftOvers.addAll( player.getInventory().addItem( itemStack ).values() );
-
-                        item.remove();
-                    }
-
-                    /*
-                     * Items can't be put inside player's inventory will be 'gathered'
-                     * at that player's feet.
-                     */
-                    for (ItemStack item : leftOvers)
-                        player.getWorld().dropItem( player.getLocation(), item );
-                },
-                0L,
-                5L
-        );
-
+        scheduleTask( event.getPlayer(), area );
         event.getItem().editMeta( meta -> meta.addEnchant( Enchantment.DURABILITY, 1, true ) );
     }
 

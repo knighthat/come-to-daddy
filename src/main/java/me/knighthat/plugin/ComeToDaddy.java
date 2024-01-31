@@ -18,7 +18,8 @@ public class ComeToDaddy extends JavaPlugin {
     private final MessageFile messages;
 
     public ComeToDaddy() {
-        DataHandler.KEY = new NamespacedKey(this, "ComeToDaddy");
+        DataHandler.KEY = new NamespacedKey( this, "ComeToDaddy" );
+        DataHandler.PROPERTY_KEY = new NamespacedKey( this, "magnet" );
 
         this.messages = new MessageFile(this);
     }

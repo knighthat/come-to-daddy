@@ -42,7 +42,8 @@ public class EventListener implements Listener {
     /*
      * Triggers when player holds and right-clicks {@link me.knighthat.plugin.item.}
      */
-    @EventHandler( priority = EventPriority.HIGHEST )
+    @Deprecated
+    @EventHandler( priority = EventPriority.LOW )
     public void onShiftRightClick( @NotNull PlayerInteractEvent event ) {
         Player player = event.getPlayer();
 
@@ -72,6 +73,9 @@ public class EventListener implements Listener {
         String msgPath = isEnabled ? "activate" : "deactivate";
         Component message = plugin.getMessages().message( msgPath );
         event.getPlayer().sendMessage( message );
+
+        // This message only shows when player uses old magnet
+        player.sendMessage( color( "&cThis magnet is deprecated and soon will be useless!" ) );
     }
 
     /*

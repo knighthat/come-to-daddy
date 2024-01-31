@@ -1,16 +1,19 @@
 package me.knighthat.plugin.item;
 
+import lombok.Getter;
 import me.knighthat.plugin.data.DataHandler;
+import me.knighthat.plugin.logging.Logger;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MagnetItem extends ItemStack {
@@ -38,25 +41,15 @@ public class MagnetItem extends ItemStack {
     private final MagnetProperties properties;
 
     public MagnetItem() {
-        super( Material.IRON_INGOT, 1 );
+        super( Material.AIR, 1 );
+        this.properties = new MagnetProperties();
 
         editMeta( meta -> {
-            // Display name
-            meta.displayName( color( "&d&lMagnet" ) );
-
-            // Lore
-            List<Component> lore = new ArrayList<>( 1 );
-            lore.add( color( "&8[Shift + Right-click] &7to toggle!" ) );
-            meta.lore( lore );
-
             // Disable descriptions
             meta.addItemFlags( ItemFlag.values() );
 
             // Make it unbreakable
             meta.setUnbreakable( true );
-
-            // Inject custom Persistent Data
-            DataHandler.inject( meta, false );
         } );
     }
 

@@ -11,9 +11,7 @@ public abstract class MagnetItemEvent extends PlayerEvent implements Cancellable
 
     private static final HandlerList handlers = new HandlerList();
 
-    public static @NotNull HandlerList getHandlerList() {
-        return handlers;
-    }
+    public static @NotNull HandlerList getHandlerList() { return handlers; }
 
     @NotNull
     private final ItemStack item;
@@ -24,16 +22,14 @@ public abstract class MagnetItemEvent extends PlayerEvent implements Cancellable
         this.item = item;
     }
 
-    public @NotNull ItemStack getItem() {return this.item;}
+    public @NotNull ItemStack getItem() { return this.item; }
 
     @Override
-    public boolean isCancelled() {return this.isCancelled;}
+    public boolean isCancelled() { return this.isCancelled; }
 
     @Override
-    public void setCancelled( boolean b ) {this.isCancelled = b;}
+    public void setCancelled( boolean b ) { this.isCancelled = b; }
 
     @Override
-    public @NotNull HandlerList getHandlers() {
-        return handlers;
-    }
+    public @NotNull HandlerList getHandlers() { return handlers; }
 }

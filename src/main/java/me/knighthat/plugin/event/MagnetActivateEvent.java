@@ -6,7 +6,5 @@ import org.jetbrains.annotations.NotNull;
 
 public class MagnetActivateEvent extends MagnetItemEvent {
 
-    public MagnetActivateEvent( @NotNull Player who, @NotNull ItemStack item ) {
-        super( who, item );
-    }
+    public MagnetActivateEvent( @NotNull Player who, @NotNull ItemStack item ) { super( who, item ); }
 }

@@ -13,22 +13,18 @@ public class MessageFile extends PluginFile {
     @NotNull
     private static Component prefix;
 
-    public MessageFile(@NotNull ComeToDaddy plugin) {
-        super(plugin, "messages");
-    }
+    public MessageFile( @NotNull ComeToDaddy plugin ) { super( plugin, "messages" ); }
 
-    private @NotNull TextComponent color(@NotNull String s) {
-        return LegacyComponentSerializer.legacyAmpersand().deserialize(s);
-    }
+    private @NotNull TextComponent color( @NotNull String s ) { return LegacyComponentSerializer.legacyAmpersand().deserialize( s ); }
 
-    public @NotNull Component message(@NotNull String path) {
-        String msgRaw = get().getString(path, "");
-        return prefix.append(color(msgRaw));
+    public @NotNull Component message( @NotNull String path ) {
+        String msgRaw = get().getString( path, "" );
+        return prefix.append( color( msgRaw ) );
     }
 
     @Override
     public void reload() {
         super.reload();
-        prefix = color(get().getString("prefix", ""));
+        prefix = color( get().getString( "prefix", "" ) );
     }
 }

@@ -26,7 +26,7 @@ public class ComeToDaddy extends JavaPlugin {
     @Override
     public void onEnable() {
         // Register event listener
-        getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        getServer().getPluginManager().registerEvents( new EventListener( this ), this );
 
         // Register command
         //getCommand( "ctd" ).setExecutor( new CommandManager( this ) );

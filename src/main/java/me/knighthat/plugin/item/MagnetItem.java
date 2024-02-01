@@ -76,10 +76,14 @@ public class MagnetItem extends ItemStack {
 
     public void setDescription( @NotNull ConfigurationSection description ) {
         String materialStr = description.getString( "material", "" );
-        Material material = Material.matchMaterial( materialStr );
-        if ( material == null )
-            throw new IllegalArgumentException( materialStr + " is NOT a valid material!" );
-        setType( material );
+        Material material = Material.getMaterial( materialStr );
+
+        if ( material == null ) {
+            String path = description.getCurrentPath() + ".material";
+            Logger.error( path + " returns invalid material (" + materialStr + ")" );
+            return;
+        } else
+            setType( material );
 
         String name = description.getString( "name", "" );
         List<String> lore = description.getStringList( "lore" );

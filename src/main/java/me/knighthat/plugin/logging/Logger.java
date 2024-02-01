@@ -24,10 +24,11 @@ public final class Logger {
     public static void exception( @NotNull String s, @NotNull Exception e ) {
         if ( !s.isEmpty() )
             error( s );
-        else if ( !e.getMessage().isEmpty() )
-            error( e.getMessage() );
 
-        if ( e.getCause() != null )
-            error( "Reason: " + e.getCause().getMessage() );
+        if ( !e.getMessage().isEmpty() )
+            error( "Reason: " + e.getMessage() );
+        
+        if ( !e.getCause().getMessage().isEmpty() )
+            error( "Cause: " + e.getCause().getMessage() );
     }
 }

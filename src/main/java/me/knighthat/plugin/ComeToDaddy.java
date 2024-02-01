@@ -5,6 +5,7 @@ import me.knighthat.plugin.data.DataHandler;
 import me.knighthat.plugin.event.EventListener;
 import me.knighthat.plugin.file.MessageFile;
 import me.knighthat.plugin.file.RecipeFile;
+import me.knighthat.plugin.logging.Logger;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +19,8 @@ public class ComeToDaddy extends JavaPlugin {
     private final RecipeFile  recipes;
 
     public ComeToDaddy() {
+        Logger.LOGGER = getSLF4JLogger();
+
         DataHandler.KEY = new NamespacedKey( this, "ComeToDaddy" );
         DataHandler.PROPERTY_KEY = new NamespacedKey( this, "magnet" );
 

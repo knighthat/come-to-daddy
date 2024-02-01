@@ -2,13 +2,11 @@
 
 Pickup items around player who has the magnet activated
 
-# Usage
+# Features
 
-Craft this item by using this crafting pattern:
-
-![magnet crafting recipe](https://i.ibb.co/2sXx1Fb/magnet-recipe.png)
-
-Then hold it in your hand and shift right-click
+* Custom range
+* Custom recipe
+* Multiple tiers
 
 # Contribute
 

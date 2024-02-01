@@ -1,6 +1,5 @@
 package me.knighthat.plugin.file;
 
-import com.google.common.base.Preconditions;
 import me.knighthat.plugin.ComeToDaddy;
 import me.knighthat.plugin.data.DataHandler;
 import me.knighthat.plugin.item.MagnetItem;
@@ -141,7 +140,12 @@ public class RecipeFile extends PluginFile {
 
         // Encode MagnetProperties to MagnetItem using PersistentData
         DataHandler.push( result, result.getProperties() );
-        Bukkit.getServer().addRecipe( recipe.getRecipe( plugin ) );
+        try {
+            // Register this recipe
+            Bukkit.getServer().addRecipe( recipe.getRecipe( plugin ) );
+        } catch ( IllegalArgumentException e ) {
+            Logger.exception( "Error while initializing recipe " + quote( recipe.getId() ), e );
+        }
     }
 
     @Override

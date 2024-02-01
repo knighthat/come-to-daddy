@@ -60,27 +60,62 @@ public class DataHandler {
         return extract( item.getItemMeta() );
     }
 
-    public static void push( @NotNull PersistentDataContainer container, @NotNull MagnetProperties properties ) {
-        container.set( PROPERTY_KEY, PROPERTY_TYPE, properties );
-    }
+    /**
+     * Inject MagnetProperties to the provided container
+     *
+     * @param container  PersistentDataContainer that holds serialized data
+     * @param properties MagnetProperties class to serialize and store inside container
+     */
+    public static void push( @NotNull PersistentDataContainer container, @NotNull MagnetProperties properties ) { container.set( PROPERTY_KEY, PROPERTY_TYPE, properties ); }
 
-    public static void push( @NotNull ItemMeta meta, @NotNull MagnetProperties properties ) {
-        push( meta.getPersistentDataContainer(), properties );
-    }
+    /**
+     * Inject MagnetProperties to the provided ItemMeta.
+     * Remember to update ItemStack with ItemStack.setItemMeta().
+     *
+     * @param meta       PersistentDataContainer holder
+     * @param properties MagnetProperties class to serialize and store inside container
+     */
+    public static void push( @NotNull ItemMeta meta, @NotNull MagnetProperties properties ) { push( meta.getPersistentDataContainer(), properties ); }
 
-    public static void push( @NotNull ItemStack item, @NotNull MagnetProperties properties ) {
-        item.editMeta( meta -> push( meta, properties ) );
-    }
+    /**
+     * Inject MagnetProperties to the provided ItemStack.
+     * This function automatically updates ItemStack once the injection is done.
+     *
+     * @param item       ItemStack to inject MagnetProperties
+     * @param properties MagnetProperties class to serialize and store inside container
+     */
+    public static void push( @NotNull ItemStack item, @NotNull MagnetProperties properties ) { item.editMeta( meta -> push( meta, properties ) ); }
 
-    public static @NotNull MagnetProperties pull( @NotNull PersistentDataContainer container ) {
-        return container.getOrDefault( PROPERTY_KEY, PROPERTY_TYPE, MagnetProperties.DEFAULT );
-    }
+    /**
+     * Extract MagnetProperties from the provided container.
+     *
+     * @param container PersistentDataContainer that holds serialized data
+     *
+     * @return either serialized data stored inside container or MagnetProperties#DEFAULT
+     *
+     * @see MagnetProperties
+     */
+    public static @NotNull MagnetProperties pull( @NotNull PersistentDataContainer container ) { return container.getOrDefault( PROPERTY_KEY, PROPERTY_TYPE, MagnetProperties.DEFAULT ); }
 
-    public static @NotNull MagnetProperties pull( @NotNull ItemMeta meta ) {
-        return pull( meta.getPersistentDataContainer() );
-    }
+    /**
+     * Extract MagnetProperties from the provided ItemMeta.
+     *
+     * @param meta PersistentDataContainer holder
+     *
+     * @return either serialized data stored inside container or MagnetProperties#DEFAULT
+     *
+     * @see MagnetProperties
+     */
+    public static @NotNull MagnetProperties pull( @NotNull ItemMeta meta ) { return pull( meta.getPersistentDataContainer() ); }
 
-    public static @NotNull MagnetProperties pull( @NotNull ItemStack item ) {
-        return pull( item.getItemMeta() );
-    }
+    /**
+     * Extract MagnetProperties from the provided ItemStack.
+     *
+     * @param item ItemStack to extract MagnetProperties
+     *
+     * @return either serialized data stored inside container or MagnetProperties#DEFAULT
+     *
+     * @see MagnetProperties
+     */
+    public static @NotNull MagnetProperties pull( @NotNull ItemStack item ) { return pull( item.getItemMeta() ); }
 }

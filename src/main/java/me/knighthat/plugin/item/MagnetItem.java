@@ -58,17 +58,20 @@ public class MagnetItem extends ItemStack {
         return LegacyComponentSerializer.legacyAmpersand().deserialize( s );
     }
 
-    private boolean isNegativeNumber( @Nullable Object obj ) {
-        if ( obj == null )
-            return false;
+    private boolean isValidNumber( @Nullable Object obj ) {
+        // Always assume the input object is NOT a positive number.
+        boolean result = false;
 
-        String objStr = String.valueOf( obj );
-        try {
-            return Double.parseDouble( objStr ) < 0d;
-        } catch ( NumberFormatException e ) {
-            Logger.error( objStr + " is not a number!" );
-            return false;
+        // If obj is null, then it'll return default value.
+        if ( obj != null ) {
+            String objStr = String.valueOf( obj );
+            try {
+                result = Double.parseDouble( objStr ) > 0d;
+            } catch ( NumberFormatException ignored ) {
+            }
         }
+
+        return result;
     }
 
     public void setDescription( @NotNull ConfigurationSection description ) {
@@ -95,15 +98,26 @@ public class MagnetItem extends ItemStack {
         String tierName = properties.getString( "tier_name", "" );
         this.properties.setTierName( tierName );
 
-        if ( isNegativeNumber( properties.get( "x" ) ) ||
-             isNegativeNumber( properties.get( "y" ) ) ||
-             isNegativeNumber( properties.get( "z" ) ) )
-            return;
-
         MagnetProperties.Area area = this.properties.getArea();
-        area.setX( properties.getDouble( "x" ) );
-        area.setY( properties.getDouble( "y" ) );
-        area.setZ( properties.getDouble( "z" ) );
+        for (String axis : new String[]{ "x", "y", "z" }) {
+
+            Object obj = properties.get( axis );
+            if ( !isValidNumber( obj ) ) {
+                String path = properties.getCurrentPath() + "." + axis;
+                Logger.error( "Value of " + path + " must be a positive number! (" + obj + ")" );
+                return;
+            }
+
+            double value = Double.parseDouble( String.valueOf( obj ) );
+            if ( value < 0 )
+                throw new NumberFormatException();
+
+            switch (axis) {
+                case "x" -> area.setX( value );
+                case "y" -> area.setY( value );
+                case "z" -> area.setZ( value );
+            }
+        }
     }
 
     public @NotNull Component toComponent() {

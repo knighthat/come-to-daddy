@@ -65,6 +65,9 @@ public class Recipe {
     }
 
     public @NotNull CraftingRecipe getRecipe( @NotNull JavaPlugin plugin ) {
+        if ( shape.isEmpty() )
+            throw new IllegalArgumentException( "No shape provided" );
+
         NamespacedKey key = new NamespacedKey( plugin, id );
 
         ShapedRecipe recipe = new ShapedRecipe( key, result );

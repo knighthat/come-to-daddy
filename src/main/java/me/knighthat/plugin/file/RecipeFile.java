@@ -88,7 +88,7 @@ public class RecipeFile extends PluginFile {
              * object to '[obj1,obj2,obj3,...]' string
              */
             String[] missing = missingKeys.toArray( String[]::new );
-            Logger.error( "These paths are missing from recipe " + quote( id ) );
+            Logger.error( "These paths are missing from recipe " + quote( recipeSection.getName() ) );
             Logger.error( "Missing key(s): " + Arrays.toString( missing ) );
         }
 
@@ -164,13 +164,14 @@ public class RecipeFile extends PluginFile {
          * And then pass it in registerRecipe for registration
          */
         for (String id : section.getKeys( false )) {
-            if ( !get().isConfigurationSection( id ) ) {
+            ConfigurationSection recipeSection = get().getConfigurationSection( id );
+            if ( recipeSection == null ) {
                 Logger.error( quote( id ) + " is NOT a valid recipe!" );
-                return;
+                continue;
             }
 
-            if ( verifyKeys( id ) )
-                registerRecipe( id );
+            if ( verifyKeys( recipeSection ) )
+                registerRecipe( recipeSection );
         }
 
     }

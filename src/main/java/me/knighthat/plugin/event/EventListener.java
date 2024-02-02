@@ -7,6 +7,7 @@ import me.knighthat.plugin.item.MagnetProperties;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -208,16 +209,34 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onPlayerLogin( @NotNull PlayerJoinEvent event ) {
-        Player player = event.getPlayer();
-        for (ItemStack item : player.getInventory().getContents())
-            if ( MagnetItem.isPluginItem( item ) ) {
+        /*
+         * When a player joins the server, we want to go through
+         * his/her inventory and look for MagnetItem by checking
+         * PersistentDataContainer for traces of this plugin.
+         *
+         * Then create and call an appropriate MagnetEvent.
+         *
+         * If the item contains neither, we move on to the next item.
+         */
 
-                boolean isEnabled = DataHandler.extract( item );
-                MagnetItemEvent itemEvent = isEnabled ?
-                        new MagnetActivateEvent( player, item ) :
-                        new MagnetDeactivateEvent( player, item );
-                Bukkit.getServer().getPluginManager().callEvent( itemEvent );
-            }
+        Player player = event.getPlayer();
+        for (ItemStack item : player.getInventory().getContents()) {
+            if ( item == null || item.getType() == Material.AIR )
+                continue;
+
+            boolean isEnabled;
+            if ( MagnetItem.isPluginItem( item ) )
+                isEnabled = DataHandler.extract( item );
+            else if ( MagnetItem.hasProperties( item ) )
+                isEnabled = DataHandler.pull( item ).isActivated();
+            else
+                continue;
+
+            MagnetItemEvent itemEvent = isEnabled ?
+                    new MagnetActivateEvent( player, item ) :
+                    new MagnetDeactivateEvent( player, item );
+            Bukkit.getServer().getPluginManager().callEvent( itemEvent );
+        }
     }
 
     /*

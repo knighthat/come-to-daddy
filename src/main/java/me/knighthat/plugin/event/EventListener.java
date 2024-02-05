@@ -22,10 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class EventListener implements Listener {
 
@@ -46,29 +43,119 @@ public class EventListener implements Listener {
         return LegacyComponentSerializer.legacyAmpersand().deserialize( s );
     }
 
-    private void collect( @NotNull Player player, double x, double y, double z ) {
-        List<ItemStack> leftOvers = new ArrayList<>();
-        /*
-         * Here we check for nearby items, then attempt to put
-         * each of them into the player's inventory. Inventory#addItem()
-         * will return any item that can't be fit into the inventory.
-         */
-        for (Entity entity : player.getNearbyEntities( x, y, z )) {
-            if ( !(entity instanceof Item item) )
-                continue;
+    /**
+     * Get nearby Item entities of provided Entity.
+     * This method ignores items that have their delay
+     * pickup still active.
+     *
+     * @param of entity to check for nearby items
+     * @param x  range on X axis
+     * @param y  range on Y axis
+     * @param z  range on Z axis
+     *
+     * @return a list of nearby items
+     */
+    private @NotNull List<Item> getNearbyItems( Entity of, double x, double y, double z ) {
+        List<Item> items = new ArrayList<>();
+        for (Entity entity : of.getNearbyEntities( x, y, z ))
+            if ( entity instanceof Item item && item.getPickupDelay() <= 0 )
+                items.add( item );
 
-            ItemStack itemStack = item.getItemStack();
-            leftOvers.addAll( player.getInventory().addItem( itemStack ).values() );
+        return items;
+    }
 
-            item.remove();
+
+    /**
+     * This algorithm will attempt to put a list of items
+     * into the player's inventory.
+     * <p>
+     * Usually, Inventory#addItem() is sufficient, but there's
+     * a small bug, for some reason; offhand isn't included
+     * in the checking process, causing it to be completely
+     * ignored.
+     * <p>
+     * This piece of code handles that missing check before
+     * handing the rest of the items to Inventory#addItem().
+     *
+     * @param to    player whose inventory will be used to add items
+     * @param items list of Item entity to add.
+     *
+     * @return a map that contains index and items that can't be put into player's inventory
+     */
+    private @NotNull Map<Integer, ItemStack> addItems( @NotNull Player to, @NotNull List<Item> items ) {
+        ItemStack[] stacks = new ItemStack[items.size()];
+
+        for (int i = 0 ; i < stacks.length ; i++) {
+            ItemStack item = items.get( i ).getItemStack();
+            ItemStack offHand = to.getInventory().getItemInOffHand();
+
+            /*
+             * Comparing ItemStacks is a little bit different
+             * from other classes, ItemStack#equals() will not
+             * return true most of the time (even when items
+             * are "similar" and false when they are completely
+             * different in properties, ItemMeta, etc.)
+             *
+             * Therefore, ItemStack#isSimilar() was born.
+             * If current item in the list matched with the one
+             * in player's offhand.
+             * There are 2 scenarios that can happen:
+             * 1. Current item's amount plus offhand's amount
+             *    is less than the maximum stack size.
+             *    If so, we just have to set offhand's amount to
+             *    the combined value and set item's amount to 0
+             *    and won't be added to 'stacks'.
+             * 2. The combined amount exceeds max stack size.
+             *    We can set offhand's amount to max stack size
+             *    while setting item's amount to the leftover amount.
+             */
+            if ( offHand.isSimilar( item ) ) {
+                int maxSize = offHand.getMaxStackSize();
+                int combined = offHand.getAmount() + item.getAmount();
+
+                offHand.setAmount( Math.min( combined, maxSize ) );
+                item.setAmount( Math.max( combined - maxSize, 0 ) );
+
+                to.updateInventory();
+            }
+
+            if ( item.getAmount() > 0 )
+                stacks[i] = item;
         }
 
-        /*
-         * Items can't be put inside player's inventory will be 'gathered'
-         * at that player's feet.
-         */
-        for (ItemStack item : leftOvers)
-            player.getWorld().dropItem( player.getLocation(), item );
+        return to.getInventory().addItem( stacks );
+    }
+
+    /**
+     * When this algorithm is called, it'll check for all items
+     * around the provided player (range are defined by x, y,
+     * and z axis's).
+     * The next step is to add those items into that player's inventory.
+     * This function also handles playing pickup animation and
+     * setting leftover items to the remaining amount if that player's
+     * inventory is full.
+     *
+     * @param player to check for nearby
+     * @param x      range on X axis
+     * @param y      range on Y axis
+     * @param z      range on Z axis
+     */
+    private void collect( @NotNull Player player, double x, double y, double z ) {
+        List<Item> nearby = getNearbyItems( player, x, y, z );
+        Map<Integer, ItemStack> leftOvers = addItems( player, nearby );
+
+        for (int i = 0 ; i < nearby.size() ; i++) {
+            Item item = nearby.get( i );
+            ItemStack leftOver = leftOvers.get( i );
+
+            player.playPickupItemAnimation( item, 0 );
+
+            if ( leftOver != null ) {
+                item.setItemStack( leftOver );
+                item.teleport( player );
+            } else
+                item.remove();
+        }
     }
 
     private void scheduleTask( @NotNull Player player, @NotNull MagnetProperties.Area area ) {

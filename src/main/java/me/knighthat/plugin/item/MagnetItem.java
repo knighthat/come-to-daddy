@@ -8,7 +8,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -43,14 +42,6 @@ public class MagnetItem extends ItemStack {
     public MagnetItem() {
         super( Material.AIR, 1 );
         this.properties = new MagnetProperties();
-
-        editMeta( meta -> {
-            // Disable descriptions
-            meta.addItemFlags( ItemFlag.values() );
-
-            // Make it unbreakable
-            meta.setUnbreakable( true );
-        } );
     }
 
     private @NotNull Component color( @NotNull String s ) {

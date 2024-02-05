@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.CraftingRecipe;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -67,6 +68,14 @@ public class Recipe {
     public @NotNull CraftingRecipe getRecipe( @NotNull JavaPlugin plugin ) {
         if ( shape.isEmpty() )
             throw new IllegalArgumentException( "No shape provided" );
+
+        result.editMeta( meta -> {
+            // Disable descriptions
+            meta.addItemFlags( ItemFlag.values() );
+
+            // Make it unbreakable
+            meta.setUnbreakable( true );
+        } );
 
         NamespacedKey key = new NamespacedKey( plugin, id );
 

@@ -22,6 +22,9 @@ import java.util.Map;
 public class Recipe implements Debuggable {
 
     @NotNull
+    public static final Map<String, Recipe> RECIPES = new HashMap<>();
+
+    @NotNull
     private final String                   id;
     @NotNull
     private final CraftingType             type;
@@ -78,6 +81,8 @@ public class Recipe implements Debuggable {
         ShapedRecipe recipe = new ShapedRecipe( namespacedKey, result );
         recipe.shape( shape.toArray( new String[3] ) );
         ingredients.forEach( recipe::setIngredient );
+
+        RECIPES.put( id, this );
 
         return recipe;
     }

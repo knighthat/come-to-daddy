@@ -1,6 +1,7 @@
 package me.knighthat.plugin.command;
 
 import me.knighthat.plugin.ComeToDaddy;
+import me.knighthat.plugin.command.sub.ReloadCommand;
 import me.knighthat.plugin.command.sub.SubCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -21,6 +22,8 @@ public class CommandManager implements CommandExecutor {
 
     public CommandManager( @NotNull ComeToDaddy plugin ) {
         this.plugin = plugin;
+
+        SUB_COMMANDS.add( new ReloadCommand( plugin ) );
     }
 
     @Override

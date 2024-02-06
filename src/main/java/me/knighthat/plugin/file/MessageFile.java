@@ -2,6 +2,7 @@ package me.knighthat.plugin.file;
 
 import lombok.Getter;
 import me.knighthat.plugin.ComeToDaddy;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -20,6 +21,10 @@ public class MessageFile extends PluginFile {
     public @NotNull Component message( @NotNull String path ) {
         String msgRaw = get().getString( path, "" );
         return prefix.append( color( msgRaw ) );
+    }
+
+    public void sendMessage( @NotNull Audience audience, @NotNull String messagePath ) {
+        audience.sendMessage( message( messagePath ) );
     }
 
     @Override

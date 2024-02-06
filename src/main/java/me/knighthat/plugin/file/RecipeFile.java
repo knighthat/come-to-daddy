@@ -6,6 +6,7 @@ import me.knighthat.plugin.item.MagnetItem;
 import me.knighthat.plugin.logging.Logger;
 import me.knighthat.plugin.recipe.Recipe;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -38,9 +39,7 @@ public class RecipeFile extends PluginFile {
         );
     }
 
-    public RecipeFile( @NotNull ComeToDaddy plugin ) {
-        super( plugin, "recipes" );
-    }
+    public RecipeFile( @NotNull ComeToDaddy plugin ) { super( plugin, "recipes" ); }
 
     /**
      * Put the provided string to be quoted.
@@ -141,8 +140,15 @@ public class RecipeFile extends PluginFile {
         // Encode MagnetProperties to MagnetItem using PersistentData
         DataHandler.push( result, result.getProperties() );
         try {
+            NamespacedKey key = new NamespacedKey( plugin, recipe.getId() );
+            /*
+             * Remove this registered recipe, so it won't throw exception
+             * when the plugin gets reloaded.
+             */
+            plugin.getServer().removeRecipe( key, true );
+
             // Register this recipe
-            Bukkit.getServer().addRecipe( recipe.getRecipe( plugin ) );
+            Bukkit.getServer().addRecipe( recipe.getRecipe( key ) );
         } catch ( IllegalArgumentException e ) {
             Logger.exception( "Error while initializing recipe " + quote( recipe.getId() ), e );
         }

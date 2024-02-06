@@ -3,5 +3,7 @@ main: ${project.groupId}.${project.name}
 version: ${project.version}
 api-version: 1.20
 
-#commands:
-#  ctd:
+commands:
+  cometodaddy:
+    aliases:
+    - ctd

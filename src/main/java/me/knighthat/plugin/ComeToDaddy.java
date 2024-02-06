@@ -1,6 +1,7 @@
 package me.knighthat.plugin;
 
 import lombok.Getter;
+import me.knighthat.plugin.command.CommandManager;
 import me.knighthat.plugin.data.DataHandler;
 import me.knighthat.plugin.event.EventListener;
 import me.knighthat.plugin.file.MessageFile;
@@ -34,6 +35,6 @@ public class ComeToDaddy extends JavaPlugin {
         getServer().getPluginManager().registerEvents( new EventListener( this ), this );
 
         // Register command
-        //getCommand( "ctd" ).setExecutor( new CommandManager( this ) );
+        getCommand( "cometodaddy" ).setExecutor( new CommandManager( this ) );
     }
 }

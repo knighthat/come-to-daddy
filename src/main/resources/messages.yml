@@ -2,3 +2,5 @@ prefix: "[&5Come To Daddy&r] "
 
 activate: "&aMagnet activated!"
 deactivate: "&7Magnet deactivated!"
+
+command_usage: "&c&lUsage: &e/%cmd% reload"

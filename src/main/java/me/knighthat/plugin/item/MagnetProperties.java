@@ -1,16 +1,15 @@
 package me.knighthat.plugin.item;
 
 import lombok.Data;
-import net.kyori.adventure.text.Component;
+import me.knighthat.plugin.utils.Debuggable;
 import org.checkerframework.checker.index.qual.Positive;
 import org.jetbrains.annotations.NotNull;
 
-import java.beans.Transient;
 import java.io.Serial;
 import java.io.Serializable;
 
 @Data
-public class MagnetProperties implements Serializable {
+public class MagnetProperties implements Serializable, Debuggable {
 
     @NotNull
     public static final MagnetProperties DEFAULT;
@@ -34,16 +33,8 @@ public class MagnetProperties implements Serializable {
         this.activated = false;
     }
 
-    @Transient
-    public @NotNull Component toComponent() {
-        return Component.text( "MagnetProperties[tier=%tier,activated=%activated,area=%area]" )
-                        .replaceText( builder -> builder.matchLiteral( "%tier" ).replacement( tierName ) )
-                        .replaceText( builder -> builder.matchLiteral( "%activated" ).replacement( Component.text( activated ) ) )
-                        .replaceText( builder -> builder.matchLiteral( "%area" ).replacement( area.toComponent() ) );
-    }
-
     @Data
-    public static class Area implements Serializable {
+    public static class Area implements Serializable, Debuggable {
 
         @Serial
         private static final long serialVersionUID = 2716382736189372639L;
@@ -63,14 +54,6 @@ public class MagnetProperties implements Serializable {
 
         public Area() {
             this( 0d, 0d, 0d );
-        }
-
-        @Transient
-        public @NotNull Component toComponent() {
-            return Component.text( "Area[x=%x,y=%y,z=%z]" )
-                            .replaceText( builder -> builder.matchLiteral( "%x" ).replacement( Component.text( x ) ) )
-                            .replaceText( builder -> builder.matchLiteral( "%y" ).replacement( Component.text( y ) ) )
-                            .replaceText( builder -> builder.matchLiteral( "%z" ).replacement( Component.text( z ) ) );
         }
     }
 }

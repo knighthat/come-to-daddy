@@ -3,8 +3,8 @@ package me.knighthat.plugin.item;
 import lombok.Getter;
 import me.knighthat.plugin.data.DataHandler;
 import me.knighthat.plugin.logging.Logger;
+import me.knighthat.plugin.utils.Debuggable;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class MagnetItem extends ItemStack {
+public class MagnetItem extends ItemStack implements Debuggable {
 
     public static boolean isPluginItem( @Nullable ItemStack item ) {
         if ( item == null )
@@ -113,23 +113,5 @@ public class MagnetItem extends ItemStack {
                 case "z" -> area.setZ( value );
             }
         }
-    }
-
-    public @NotNull Component toComponent() {
-        return Component.text( "MagnetItem[material=%material,name=%name,lore=[%lore],properties=%properties]" )
-                        .replaceText( builder -> builder.matchLiteral( "%material" ).replacement( getType().name() ) )
-                        .replaceText( builder -> builder.matchLiteral( "%name" ).replacement( displayName() ) )
-                        .replaceText( builder -> {
-                            if ( lore() == null )
-                                return;
-
-                            TextComponent.Builder lore = Component.text();
-                            for (Component line : lore())
-                                lore.append( line )
-                                    .append( Component.text( ", " ) );
-
-                            builder.matchLiteral( "%lore" ).replacement( lore.build() );
-                        } )
-                        .replaceText( builder -> builder.matchLiteral( "%properties" ).replacement( properties.toComponent() ) );
     }
 }

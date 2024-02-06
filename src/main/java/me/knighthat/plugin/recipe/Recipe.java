@@ -4,8 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.knighthat.plugin.item.MagnetItem;
 import me.knighthat.plugin.logging.Logger;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
+import me.knighthat.plugin.utils.Debuggable;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-public class Recipe {
+public class Recipe implements Debuggable {
 
     @NotNull
     private final String                   id;
@@ -81,31 +80,5 @@ public class Recipe {
         ingredients.forEach( recipe::setIngredient );
 
         return recipe;
-    }
-
-    public @NotNull Component toComponent() {
-        return Component.text( "Recipe[id=%id,type=%type,shape=[%shape],ingredients=[%ingredients],result=%result]" )
-                        .replaceText( builder -> builder.matchLiteral( "%id" ).replacement( id ) )
-                        .replaceText( builder -> builder.matchLiteral( "%type" ).replacement( type.name() ) )
-                        .replaceText( builder -> {
-                            TextComponent.Builder shape = Component.text();
-                            for (String s : this.shape)
-                                shape.append( Component.text( s ) )
-                                     .append( Component.text( ", " ) );
-
-                            builder.matchLiteral( "%shape" ).replacement( shape.build() );
-                        } )
-                        .replaceText( builder -> {
-                            TextComponent.Builder ingredients = Component.text();
-                            for (Map.Entry<Character, Material> entry : this.ingredients.entrySet()) {
-                                ingredients.append( Component.text( entry.getKey() ) )
-                                           .append( Component.text( ":" ) )
-                                           .append( Component.text( entry.getValue().name() ) )
-                                           .append( Component.text( ", " ) );
-
-                            }
-                            builder.matchLiteral( "%ingredients" ).replacement( ingredients.build() );
-                        } )
-                        .replaceText( builder -> builder.matchLiteral( "%result" ).replacement( result.toComponent() ) );
     }
 }
